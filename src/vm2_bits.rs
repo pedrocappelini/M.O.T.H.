@@ -2,6 +2,7 @@ pub struct Vm2Bits {
     pub reg: [u8; 4],
     pub add: bool,
     pub adc: bool,
+    pub sbb: bool,
 }
 
 impl Vm2Bits {
@@ -10,6 +11,7 @@ impl Vm2Bits {
             reg: [0; 4],
             add: true,
             adc: false,
+            sbb: false,
         }
     }
 
@@ -18,6 +20,7 @@ impl Vm2Bits {
         let mut b = self.reg[1];
 
         let mut previous_carry = self.reg[3];
+        let mut previous_borrow = previous_carry;
 
         if self.add {
             while b != 0 {
@@ -40,6 +43,14 @@ impl Vm2Bits {
                 previous_carry = carry << 1;
             }
             self.adc = false;
+            self.reg[3] = 0;
+        } else if self.sbb {
+            while previous_borrow != 0 {
+                let borrow = (!a) & previous_borrow;
+                a = a ^ previous_borrow;
+                previous_borrow = borrow << 1;
+            }
+            self.sbb = false;
             self.reg[3] = 0;
         }
 

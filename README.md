@@ -1,4 +1,4 @@
-Macro. Octet. Tetrad. Heart.
+Macro. Octad. Tetrad. Handler.
 THE MOTH
 
 It is a 2bit ALU, inside of a 4bit VM, inside of a 8bitVM, inside of a 16bitVM.

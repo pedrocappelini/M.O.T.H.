@@ -34,7 +34,7 @@ impl Vm4Bits {
             //halt
             0b0000 => {}
             //assigns a value to a register
-            0b0010 => {
+            0b0100 => {
                 let reg_adr = nibble1;
                 self.reg[reg_adr as usize] = nibble2;
             }
@@ -77,6 +77,9 @@ impl Vm4Bits {
                 let reg2_num_low = self.reg[reg_adr2 as usize] & 0b11;
                 let reg2_num_high = self.reg[reg_adr2 as usize] >> 2;
 
+                println!("{:04b}", self.reg[nibble1 as usize]);
+                println!("{:04b}", self.reg[nibble2 as usize]);
+
                 self.alu.add = true;
 
                 self.alu.reg[0] = reg1_num_low;
@@ -96,8 +99,39 @@ impl Vm4Bits {
                 self.reg[reg_adr1 as usize] = self.reg[7] | self.alu.reg[0] << 2;
                 self.reg[7] = self.alu.reg[3]; //overwrited to hold the carry
 
+                println!("{:04b}", self.reg[reg_adr1 as usize]);
+                println!("{:04b}", self.reg[7]);
+            }
+            //SUB rx, ry -----> rx
+            0b0010 => {
+                let reg_adr1 = nibble1;
+                let reg_adr2 = nibble2;
+                let reg1_num_low = self.reg[reg_adr1 as usize] & 0b11;
+                let reg1_num_high = self.reg[reg_adr1 as usize] >> 2;
+                let reg2_num_low = self.reg[reg_adr2 as usize] & 0b11;
+                let reg2_num_high = self.reg[reg_adr2 as usize] >> 2;
+
                 println!("{:04b}", self.reg[nibble1 as usize]);
                 println!("{:04b}", self.reg[nibble2 as usize]);
+
+                self.alu.add = false;
+
+                self.alu.reg[0] = reg1_num_low;
+                self.alu.reg[1] = reg2_num_low;
+                self.alu.cycles();
+
+                self.reg[7] = self.alu.reg[0];
+
+                if self.alu.reg[3] == 1 {
+                    self.alu.sbb = true;
+                }
+
+                self.alu.reg[0] = reg1_num_high;
+                self.alu.reg[1] = reg2_num_high;
+                self.alu.cycles();
+
+                self.reg[reg_adr1 as usize] = self.reg[7] | self.alu.reg[0] << 2;
+                self.reg[7] = self.alu.reg[3]; //Overwrites the borrow
 
                 println!("{:04b}", self.reg[reg_adr1 as usize]);
                 println!("{:04b}", self.reg[7]);
