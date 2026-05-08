@@ -2,54 +2,49 @@
 
 ### Macro. Octad. Tetrad. Handler.
 
----
+THE MOTH is an intentionally inefficient, nested virtual machine architecture. It consists of a 2-bit ALU running inside a 4-bit VM, which operates inside an 8-bit VM, all enclosed within a 16-bit VM.
 
-It is a 2bit ALU, inside of a 4bit VM, inside of a 8bitVM, inside of a 16bitVM.
+None of the individual VMs can perform arithmetic on their own. They function as a single unit by routing all addition and subtraction through the central ALU, and through other VMs if necessary.
 
-None of the VMs are able to make an sum or a subtraction by themselves. However, they do work as a single VM, as long as they are able to communicate with the ALU.
-
-It is, in fact, made to be inefficient. It also has zero "+" or "-"
+**This project is currently under development.**
 
 ---
 
-**It is still under development.**
+## The Handler
+
+The Handler acts as the system's central 2-bit ALU.
+
+### State Flags
+
+- **add:** `true` for an ADD instruction, `false` for a SUB instruction.
+- **adc:** `true` if performing an addition with carry.
+- **sbb:** `true` if performing a subtraction with borrow.
+
+### Registers
+
+- **reg[0]:** Accumulator. Always used to store the result of an operation.
+- **reg[1]:** Operand. Used to store the second value in operations that require two registers. (Does nothing during immediate operations).
+- **reg[2]:** Reserved. Currently unused.
+- **reg[3]:** Carry/Borrow. Always used to store the carry or borrow of an operation, if one exists.
 
 ---
 
-##Handler
+## The Tetrad (4-Bit VM)
 
-The handler is just an ALU.
+Tetrad instructions consist of two or three nibbles. The first nibble is always the OPCODE. The second and third nibbles (`X` and `Y`) represent either a register address or an immediate value.
 
-#It has three bools:
+### Instruction Set (So Far)
 
-- add -> true if it receives and ADD instruction, false if it receives an SUB instruction.
-- adc -> true if it has to make a sum with carry.
-- sbb -> true if it has to make a subtraction with borrow.
+| Opcode  | Mnemonic | Description                                                                               |
+| :------ | :------- | :---------------------------------------------------------------------------------------- |
+| `0x0`   | HALT     | Stops the Program Counter and halts the Tetrad.                                           |
+| `0x1XY` | ASSIGN   | Assigns the immediate value `Y` to register `X`.                                          |
+| `0x2XY` | SUB      | Subtracts the value in register `Y` from register `X`. Stores the result in register `X`. |
+| `0x3XY` | ADD      | Adds the value in register `Y` to register `X`. Stores the result in register `X`.        |
+| `0x4XY` | ADI      | Adds the immediate value `Y` to register `X`. Stores the result in register `X`.          |
 
-#And four registers:
+**_More will be added soon._**
 
-- reg[0] -> Will always be the register used to store the result of the operations.
-- reg[1] -> Will be used on operations that use two registers. For immediate operations, it will do nothing.
-- reg[2] -> For now, it does nothing.
-- reg[3] -> Will always be used to store either the carry of the borrow of operations (if it exists).
+### Registers
 
----
-
-##Tetrad Instructions _(so far)_:
-
-They are made of two or three nibbles.
-
-First nibble will always be the OPCODE.
-Second and third nibbles will either act as a address or an immediate value.
-
-#Instructions (so far)
-
-- (0x0) ---> The halt instruction. It halts the PC and stops the Tetrad.
-- (0x1XY) ---> The assign instruction. It assings to the register [X] the value Y.
-- (0x2XY) ---> SUB. Subtracts the value of register Y from the value in register X. Stores the result in register X.
-- (0x3XY) ---> ADD. Adds the value of register Y to the value in register X. Stores the result in register X.
-- (0x4XY) ---> ADI. Adds an immediate Y to the value in register X. Stores in register X.
-
-#Registers
-
-- For now, the only register with a rule to it is register [0x7]. It will always be used to store the carry or the borrow of operations.
+Currently, the only register with a specific hardware rule is **reg[0x7]**. It is strictly reserved to store the carry or borrow output of Tetrad operations.
